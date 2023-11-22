@@ -1,0 +1,45 @@
+#InstallLibrary
+!pip install selenium
+!pip install pandas
+!pip install chromedriver-autoinstaller
+!pip install BeautifulSoup4
+
+#AmbilDataBeritaDetik
+from bs4 import BeautifulSoup
+import requests
+import pandas as pd
+from selenium import webdriver
+
+Data = []
+i = 1
+
+for page in range(3):
+    url = "https://www.detik.com/search/searchall?query=pemilu&sortby=time&page=" + str(page)
+    response = requests.get(url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+    else:
+        print("Gagal mengunduh halaman web")
+
+    beritas = soup.findAll('span', class_='box_text')
+
+    for berita in beritas:
+        judulBeritaElement = berita.find('h2', class_='title')
+        if judulBeritaElement:
+            judulBerita = judulBeritaElement.text.strip()
+        tanggalBeritaElement = berita.find('span', class_='date')
+        if tanggalBeritaElement:
+            tanggalBerita = tanggalBeritaElement.text.strip()
+        kontenBerita= berita.find('p').text    
+        
+        Data.append({'Nomor': i, 'Judul': judulBerita, 'tanggal dan sumber': tanggalBerita})
+        i+=1
+        print(Data[-1])
+
+#Buat Print Ke CSV
+df = pd.DataFrame(Data)
+df.to_csv('Pemilu.csv', index=False)
+
+#Buat Print Ke CSV
+df = pd.DataFrame(Data)
+df.to_txt('Pemilu.txt', index=False)
